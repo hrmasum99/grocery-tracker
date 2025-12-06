@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------- #
+#                  GENERAL NODE.JS BACKEND IGNORE                  #
+# ---------------------------------------------------------------- #
+
+# Dependencies
+# ---------------------------------------------------------------- #
+# The 'node_modules' directory stores all installed NPM packages.
+# This should always be ignored, as it can be recreated via 'npm install'.
+/node_modules
+/package-lock.json 
+# If you are using NPM version 7 or later, you may want to keep package-lock.json
+# for consistent dependency installation across environments. Delete the line above
+# if you want to commit it.
+
+# Compiled / Build Artifacts
+# ---------------------------------------------------------------- #
+/dist 
+/build 
+.env.staging
+.env.production
+
+# Environment Variables and Sensitive Data
+# ---------------------------------------------------------------- #
+# The '.env' file contains your MongoDB URI, JWT Secret, etc., 
+# which must NEVER be committed to version control.
+.env
+
+# Logs and Runtime Data
+# ---------------------------------------------------------------- #
+/npm-debug.log
+.eslintcache
+.pnpm-debug.log
+
+# Operating System Files
+# ---------------------------------------------------------------- #
+.DS_Store # Mac
+Thumbs.db # Windows
