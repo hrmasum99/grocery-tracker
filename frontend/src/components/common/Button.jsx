@@ -1,7 +1,17 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 
-const Button = ({ children, variant = 'primary', size = 'md', onClick, className = '', icon: Icon }) => {
-  const baseStyles = 'font-medium rounded-lg transition flex items-center justify-center';
+const Button = ({ 
+  children, 
+  variant = 'primary', 
+  size = 'md', 
+  onClick, 
+  className = '', 
+  icon: Icon,
+  loading = false,
+  disabled = false
+}) => {
+  const baseStyles = 'font-medium rounded-lg transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed';
   const variants = {
     primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
     secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300',
@@ -17,9 +27,14 @@ const Button = ({ children, variant = 'primary', size = 'md', onClick, className
   return (
     <button
       onClick={onClick}
+      disabled={disabled || loading}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
     >
-      {Icon && <Icon size={18} className="mr-2" />}
+      {loading ? (
+        <Loader2 className="animate-spin mr-2" size={18} />
+      ) : Icon ? (
+        <Icon size={18} className="mr-2" />
+      ) : null}
       {children}
     </button>
   );

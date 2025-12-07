@@ -7,7 +7,7 @@ const expenseSchema = mongoose.Schema(
       required: [true, 'Please add a product name'],
     },
     amount: {
-      type: String,
+      type: Number,
       required: [true, 'Please add an amount'],
     },
     purchaseDate: {
