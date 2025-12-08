@@ -100,7 +100,7 @@ const ExpensesPage = () => {
     <div className="space-y-6 animate-fadeIn">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slideInLeft">
-        <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white transform hover:scale-105 transition-transform duration-300">
+        <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-sm mb-1">Total Expenses</p>
@@ -112,7 +112,7 @@ const ExpensesPage = () => {
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white transform hover:scale-105 transition-transform duration-300">
+        <Card className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-sm mb-1">Total Amount</p>
@@ -124,7 +124,7 @@ const ExpensesPage = () => {
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white transform hover:scale-105 transition-transform duration-300">
+        <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-sm mb-1">This Month</p>
@@ -159,7 +159,6 @@ const ExpensesPage = () => {
               setSelectedExpense(null);
               setShowModal(true);
             }}
-            className="transform hover:scale-105 transition-transform duration-300"
           >
             Add New Expense
           </Button>
