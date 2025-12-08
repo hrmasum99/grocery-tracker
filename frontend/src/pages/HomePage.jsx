@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, TrendingUp, Users, Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ShoppingCart, TrendingUp, Users, Eye, EyeOff, Loader2 } from 'lucide-react';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import { useAuth } from '../context/AuthContext';
@@ -13,21 +13,22 @@ const HomePage = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
       {/* Navbar */}
       <nav className="bg-white/80 backdrop-blur-md shadow-md fixed w-full z-50 animate-slideInLeft">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-1.5 sm:space-x-2 group cursor-pointer">
               <ShoppingCart className="text-green-600" size={32} />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                 Grocery Tracker
               </h1>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex space-x-2 sm:space-x-3">
               <Button
                 variant="ghost"
                 onClick={() => {
                   setIsLogin(true);
                   setShowAuthModal(true);
                 }}
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4"
               >
                 Login
               </Button>
@@ -36,6 +37,7 @@ const HomePage = () => {
                   setIsLogin(false);
                   setShowAuthModal(true);
                 }}
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4"
               >
                 Sign Up
               </Button>

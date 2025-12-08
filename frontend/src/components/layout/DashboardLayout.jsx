@@ -15,18 +15,20 @@ const DashboardLayout = () => {
       <Navbar />
 
       {/* Main content with proper padding for fixed navbar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        {/* Navigation buttons with fixed z-index */}
-        <div className="flex space-x-2 mb-6 animate-slideInLeft relative z-[10]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20 md:pt-24">
+        {/* Navigation buttons - will be hidden when modal is open via body class */}
+        <div id="nav-buttons" className="flex flex-wrap gap-2 mb-6 animate-slideInLeft">
           <Button
             variant={currentView === 'expenses' ? 'primary' : 'ghost'}
             onClick={() => setCurrentView('expenses')}
+            className="text-sm md:text-base"
           >
             Expenses
           </Button>
           <Button
             variant={currentView === 'summary' ? 'primary' : 'ghost'}
             onClick={() => setCurrentView('summary')}
+            className="text-sm md:text-base"
           >
             Summary
           </Button>
@@ -34,6 +36,7 @@ const DashboardLayout = () => {
             <Button
               variant={currentView === 'users' ? 'primary' : 'ghost'}
               onClick={() => setCurrentView('users')}
+              className="text-sm md:text-base"
             >
               Users
             </Button>
@@ -41,7 +44,7 @@ const DashboardLayout = () => {
         </div>
 
         {/* Page content */}
-        <div className="animate-fadeIn relative z-[1]">
+        <div className="animate-fadeIn">
           {currentView === 'expenses' && <ExpensesPage />}
           {currentView === 'summary' && <SummaryPage />}
           {currentView === 'users' && user?.role === 'admin' && <UsersPage />}
