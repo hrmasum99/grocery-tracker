@@ -1,35 +1,36 @@
 const mongoose = require('mongoose');
 
-const expenseSchema = mongoose.Schema(
-  {
-    productName: {
-      type: String,
-      required: [true, 'Please add a product name'],
-    },
-    amount: {
-      type: Number,
-      required: [true, 'Please add an amount'],
-    },
-    purchaseDate: {
-      type: Date,
-      required: [true, 'Please add a purchase date'],
-    },
-    purchasedBy: {
-      type: String,
-      required: [true, 'Please add the purchaser name'],
-      enum: ['Masum', 'Masud', 'Akash', 'Other'], // Customize this list
-    },
-  // NEW FIELD FOR TRACING
-    updatedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false, // Optional, only set on updates
-    },
-    // The timestamps field will automatically handle createdAt and updatedAt
+const expenseSchema = mongoose.Schema({
+  productName: { type: String, required: true },
+  amount: { type: Number, required: true }, // Net Amount
+  tax: { type: Number, default: 0 }, // Optional VAT/Tax
+  totalAmount: { type: Number }, // amount + tax
+  quantity: { type: Number, default: 1 },
+  unit: { 
+    type: String, 
+    enum: ['kg', 'gm', 'L', 'ml', 'pcs', 'dozen', 'box', 'none'], 
+    default: 'none' 
   },
-  {
-    timestamps: true, // Adds createdAt and updatedAt fields
-  }
-);
+  purchaseDate: { type: Date, required: true },
+  purchasedBy: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  },
+  category: { 
+    type: String, 
+    required: true, 
+    enum: ['Grocery', 'Utility', 'Rent', 'Personal', 'Other'] 
+  },
+  groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group', required: true },
+  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+}, { timestamps: true });
+
+// Auto-calculate totalAmount before saving
+expenseSchema.pre('save', function(next) {
+  this.totalAmount = this.amount + this.tax;
+  next();
+});
 
 module.exports = mongoose.model('Expense', expenseSchema);

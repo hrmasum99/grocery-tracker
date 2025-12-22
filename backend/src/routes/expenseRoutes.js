@@ -22,4 +22,12 @@ router.route('/:id')
   .put(protect, admin, updateExpense) // update-item (by admin)
   .delete(protect, admin, deleteExpense); // delete-item (by admin)
 
+  router.route('/group/:groupId')
+  .get(protect, getExpenses)
+  .post(protect, addExpense);
+
+router.route('/:id')
+  .put(protect, updateExpense)
+  .delete(protect, deleteExpense);
+
 module.exports = router;

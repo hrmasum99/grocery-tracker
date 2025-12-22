@@ -1,4 +1,6 @@
 const Expense = require('../models/Expense');
+const MonthlyAdjustment = require('../models/MonthlyAdjustment');
+const User = require('../models/User');
 
 // ------------------- QUERY & SUMMARY SERVICES -------------------
 
@@ -123,6 +125,102 @@ const deleteExpense = async (id) => {
     return { message: 'Expense item removed successfully' };
 };
 
+const getUserTotalExpenditure = async (userId, timeframe) => {
+  // Finds all expenses where the user is the 'addedBy' OR part of the group
+  return await Expense.aggregate([
+    { $match: { 
+        addedBy: mongoose.Types.ObjectId(userId),
+        purchaseDate: { $gte: timeframe.start, $lte: timeframe.end }
+    }},
+    { $group: { _id: "$category", total: { $sum: "$amount" } } }
+  ]);
+};
+
+const calculateMonthlyShare = async (groupId, month, year) => {
+  const Group = require('../models/Group'); // Lazy load to avoid circular dependency
+  
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+  
+  // 1. Get Group & Members
+  const group = await Group.findById(groupId).populate('members');
+  if (!group) throw new Error('Group not found');
+
+  // 2. Get Total Shared Expenses (Grocery/Utility/Rent)
+  const sharedExpenses = await Expense.aggregate([
+    { $match: { 
+        groupId: mongoose.Types.ObjectId(groupId),
+        category: { $in: ['Grocery', 'Utility', 'Rent', 'Other'] }, // Exclude 'Personal'
+        purchaseDate: { $gte: startDate, $lte: endDate }
+    }},
+    { $group: { _id: null, total: { $sum: '$amount' } } }
+  ]);
+
+  const totalSharedAmount = sharedExpenses.length > 0 ? sharedExpenses[0].total : 0;
+
+  // 3. Get Adjustments (Active Days)
+  const adjustments = await MonthlyAdjustment.find({
+    groupId, month, year
+  });
+
+  // 4. Calculate Total Active Days of ALL members
+  let totalGroupActiveDays = 0;
+  const memberData = group.members.map(member => {
+    const adj = adjustments.find(a => a.userId.toString() === member._id.toString());
+    const daysInMonth = new Date(year, month, 0).getDate();
+    
+    // Default to full month if no adjustment set by leader
+    const activeDays = adj ? adj.activeDays : daysInMonth;
+    
+    totalGroupActiveDays += activeDays;
+    
+    return {
+      userId: member._id,
+      name: member.name,
+      email: member.email,
+      fcmToken: member.fcmToken,
+      activeDays,
+      daysInMonth
+    };
+  });
+
+  // 5. Calculate Cost Per Day
+  // If totalActiveDays is 0 (unlikely), avoid NaN
+  const costPerDay = totalGroupActiveDays > 0 ? (totalSharedAmount / totalGroupActiveDays) : 0;
+
+  // 6. Final Calculation per Member
+  const finalShares = await Promise.all(memberData.map(async (m) => {
+    // Shared Cost
+    const sharedCost = m.activeDays * costPerDay;
+
+    // Add Personal Expenses (Not shared)
+    const personalExpenses = await Expense.aggregate([
+      { $match: { 
+          groupId: mongoose.Types.ObjectId(groupId),
+          addedBy: m.userId,
+          category: 'Personal',
+          purchaseDate: { $gte: startDate, $lte: endDate }
+      }},
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const personalCost = personalExpenses.length > 0 ? personalExpenses[0].total : 0;
+
+    return {
+      ...m,
+      sharedCost,
+      personalCost,
+      totalToPay: sharedCost + personalCost
+    };
+  }));
+
+  return {
+    month,
+    year,
+    totalSharedAmount,
+    costPerDay,
+    members: finalShares
+  };
+};
 
 module.exports = {
     queryExpenses,
@@ -130,4 +228,6 @@ module.exports = {
     createExpense,
     updateExpense,
     deleteExpense,
+    getUserTotalExpenditure,
+    calculateMonthlyShare,
 };

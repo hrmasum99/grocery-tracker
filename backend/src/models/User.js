@@ -21,6 +21,15 @@ const userSchema = mongoose.Schema(
       enum: ['user', 'admin'], // Authorization feature
       default: 'user',
     },
+    isVerified: { 
+      type: Boolean, 
+      default: false 
+    },
+    verificationToken: String,
+    groups: [{ 
+      type: mongoose.Schema.Types.ObjectId, ref: 'Group' 
+    }],
+    fcmToken: String,
   },
   {
     timestamps: true,
@@ -28,11 +37,14 @@ const userSchema = mongoose.Schema(
 );
 
 // Middleware to hash password before saving (pre-save hook)
-userSchema.pre('save', async function (next) {
+// REMOVED 'next' parameter to use pure async/await logic
+userSchema.pre('save', async function () {
+  // 1. If password is not modified, simply return (promise resolves automatically)
   if (!this.isModified('password')) {
-    next();
+    return;
   }
 
+  // 2. Hash the password
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
