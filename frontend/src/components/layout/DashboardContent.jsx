@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import Navbar from './Navbar';
-import Button from '../common/Button';
-import ExpensesPage from '../../pages/ExpensesPage';
-import SummaryPage from '../../pages/SummaryPage';
-import UsersPage from '../../pages/UsersPage';
-import { useAuth } from '../../context/AuthContext';
+'use client';
 
-const DashboardLayout = () => {
+import { useState } from 'react';
+import Navbar from '@/components/layout/Navbar';
+import Button from '@/components/common/Button';
+import ExpensesPage from '@/components/layout/ExpensesPage';
+import SummaryPage from '@/components/layout/SummaryPage';
+import UsersPage from '@/components/layout/UsersPage';
+import { useAuth } from '@/context/AuthContext';
+
+export default function DashboardContent() {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState('expenses');
 
@@ -14,9 +16,7 @@ const DashboardLayout = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 animate-fadeIn">
       <Navbar />
 
-      {/* Main content with proper padding for fixed navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20 md:pt-24">
-        {/* Navigation buttons - will be hidden when modal is open via body class */}
         <div id="nav-buttons" className="flex flex-wrap gap-2 mb-6 animate-slideInLeft">
           <Button
             variant={currentView === 'expenses' ? 'primary' : 'ghost'}
@@ -43,7 +43,6 @@ const DashboardLayout = () => {
           )}
         </div>
 
-        {/* Page content */}
         <div className="animate-fadeIn">
           {currentView === 'expenses' && <ExpensesPage />}
           {currentView === 'summary' && <SummaryPage />}
@@ -52,6 +51,4 @@ const DashboardLayout = () => {
       </div>
     </div>
   );
-};
-
-export default DashboardLayout;
+}

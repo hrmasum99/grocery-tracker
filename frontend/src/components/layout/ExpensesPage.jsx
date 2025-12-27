@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Filter, Plus, Edit2, Trash2, Search, Calendar, DollarSign, User, Package, Loader2 } from 'lucide-react';
-import Card from '../components/common/Card';
-import Button from '../components/common/Button';
-import Input from '../components/common/Input';
-import Select from '../components/common/Select';
-import Table from '../components/common/Table';
-import ExpenseModal from '../components/expense/ExpenseModal';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { Filter, Plus, Edit2, Trash2, Calendar, Package, Loader2, User } from 'lucide-react';
+import Card from '@/components/common/Card';
+import Button from '@/components/common/Button';
+import Input from '@/components/common/Input';
+import Select from '@/components/common/Select';
+import Table from '@/components/common/Table';
+import ExpenseModal from '@/components/expense/ExpenseModal';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/services/api';
 
 const ExpensesPage = () => {
   const { user } = useAuth();
@@ -22,11 +24,7 @@ const ExpensesPage = () => {
     endDate: '',
   });
 
-  useEffect(() => {
-    fetchExpenses();
-  }, [filters]);
-
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.expenses.getAll(filters);
@@ -36,7 +34,11 @@ const ExpensesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this expense?')) return;
@@ -69,8 +71,7 @@ const ExpensesPage = () => {
       label: 'Amount',
       render: (row) => (
         <div className="flex items-center space-x-2">
-          <DollarSign className="text-green-600" size={16} />
-          <span className="text-lg font-bold text-gray-900">${row.amount}</span>
+          <span className="text-lg font-bold text-green-600">৳{parseFloat(row.amount).toFixed(2)}</span>
         </div>
       ),
     },
@@ -100,7 +101,7 @@ const ExpensesPage = () => {
     <div className="space-y-6 animate-fadeIn">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slideInLeft">
-        <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white">
+        <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white transform hover:scale-105 transition-transform duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-sm mb-1">Total Expenses</p>
@@ -112,19 +113,19 @@ const ExpensesPage = () => {
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+        <Card className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white transform hover:scale-105 transition-transform duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-sm mb-1">Total Amount</p>
-              <p className="text-3xl font-bold">${totalAmount.toFixed(2)}</p>
+              <p className="text-3xl font-bold">৳{totalAmount.toFixed(2)}</p>
             </div>
             <div className="bg-white/20 p-4 rounded-full">
-              <DollarSign size={32} />
+              <span className="text-3xl font-bold">৳</span>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+        <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white transform hover:scale-105 transition-transform duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-sm mb-1">This Month</p>
@@ -159,6 +160,7 @@ const ExpensesPage = () => {
               setSelectedExpense(null);
               setShowModal(true);
             }}
+            className="transform hover:scale-105 transition-transform duration-300"
           >
             Add New Expense
           </Button>
@@ -223,36 +225,40 @@ const ExpensesPage = () => {
           <Table
             columns={columns}
             data={expenses}
-            actions={
-              user?.role === 'admin'
-                ? (row) => (
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => {
-                          setSelectedExpense(row);
-                          setShowModal(true);
-                        }}
-                        className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition transform hover:scale-110"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(row._id)}
-                        className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition transform hover:scale-110"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  )
-                : null
-            }
+            actions={(row) => (
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => {
+                    setSelectedExpense(row);
+                    setShowModal(true);
+                  }}
+                  className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition transform hover:scale-110"
+                  title="Edit"
+                >
+                  <Edit2 size={16} />
+                </button>
+                {user?.role === 'admin' && (
+                  <button
+                    onClick={() => handleDelete(row._id)}
+                    className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition transform hover:scale-110"
+                    title="Delete"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            )}
           />
         )}
       </Card>
 
       <ExpenseModal
+        key={selectedExpense?._id || 'new'}
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setSelectedExpense(null);
+        }}
         expense={selectedExpense}
         onSuccess={fetchExpenses}
       />

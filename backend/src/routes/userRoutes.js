@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, getUsers, updateUser, deleteUser } = require('../controllers/userController');
+const { registerUser, loginUser, getUsers, getUserById, updateUser, deleteUser } = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
@@ -11,6 +11,7 @@ router.route('/')
   .get(protect, admin, getUsers);
 
 router.route('/:id')
+.get(protect, admin, getUserById) 
   .put(protect, admin, updateUser)
   .delete(protect, admin, deleteUser);
 

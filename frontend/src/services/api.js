@@ -1,7 +1,7 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const request = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('token');
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const headers = {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
@@ -35,6 +35,7 @@ const api = {
       const query = new URLSearchParams(params).toString();
       return request(`/expenses?${query}`);
     },
+    getById: (id) => request(`/expenses/${id}`), // NEW
     create: (data) => request('/expenses', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -52,10 +53,13 @@ const api = {
 
   users: {
     getAll: () => request('/users'),
+    getById: (id) => request(`/users/${id}`), // NEW
+    update: (id, data) => request(`/users/${id}`, { // NEW
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
     delete: (id) => request(`/users/${id}`, { method: 'DELETE' }),
   },
 };
 
 export default api;
-
-console.log(process.env.REACT_APP_API_BASE_URL);

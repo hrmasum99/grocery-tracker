@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { TrendingUp, Calendar, DollarSign, PieChart, BarChart3, Loader2 } from 'lucide-react';
-import Card from '../components/common/Card';
-import Input from '../components/common/Input';
-import Select from '../components/common/Select';
-import api from '../services/api';
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { TrendingUp, Calendar, PieChart, BarChart3, Loader2 } from 'lucide-react';
+import Card from '@/components/common/Card';
+import Input from '@/components/common/Input';
+import Select from '@/components/common/Select';
+import api from '@/services/api';
 
 const SummaryPage = () => {
   const [summary, setSummary] = useState(null);
@@ -14,11 +16,7 @@ const SummaryPage = () => {
     month: (new Date().getMonth() + 1).toString(),
   });
 
-  useEffect(() => {
-    fetchSummary();
-  }, [filters]);
-
-  const fetchSummary = async () => {
+  const fetchSummary = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.expenses.getSummary(filters);
@@ -28,7 +26,11 @@ const SummaryPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -121,25 +123,25 @@ const SummaryPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Summary Card */}
           <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-green-500 via-blue-500 to-purple-600 rounded-2xl shadow-2xl p-8 text-white animate-fadeIn">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-gradient-to-br from-green-500 via-blue-500 to-purple-600 rounded-2xl shadow-2xl p-8 text-white transform hover:scale-105 transition-all duration-300 animate-fadeIn relative overflow-hidden">
+              <div className="flex items-center justify-between mb-6 relative z-10">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-white/20 p-3 rounded-full">
+                  <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
                     <TrendingUp size={32} />
                   </div>
                   <div>
-                    <p className="text-sm">Total Expenditure</p>
+                    <p className="text-sm opacity-90">Total Expenditure</p>
                     <h3 className="text-2xl font-bold">{summary.title}</h3>
                   </div>
                 </div>
-                <div className="bg-white/20 p-4 rounded-full animate-pulse-slow">
-                  <DollarSign size={32} />
+                <div className="bg-white/20 p-4 rounded-full animate-pulse-slow backdrop-blur-sm">
+                  <span className="text-3xl font-bold">৳</span>
                 </div>
               </div>
 
-              <div className="mt-8">
-                <div className="text-6xl md:text-7xl font-bold mb-2">
-                  ${summary.totalExpenditure.toFixed(2)}
+              <div className="mt-8 relative z-10">
+                <div className="text-6xl md:text-7xl font-bold mb-2 animate-float">
+                  ৳{summary.totalExpenditure.toFixed(2)}
                 </div>
                 <div className="flex items-center space-x-2 text-green-100">
                   <Calendar size={16} />
@@ -150,14 +152,14 @@ const SummaryPage = () => {
               </div>
 
               {/* Decorative Elements */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -z-10"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -z-10"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
             </div>
           </div>
 
           {/* Side Stats */}
           <div className="space-y-6">
-            <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
+            <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 transform hover:scale-105 transition-transform duration-300">
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-green-500 p-3 rounded-full">
                   <PieChart className="text-white" size={24} />
@@ -165,13 +167,13 @@ const SummaryPage = () => {
               </div>
               <p className="text-sm text-green-700 mb-1">Daily Average</p>
               <p className="text-3xl font-bold text-green-900">
-                ${summary.totalExpenditure > 0 
+                ৳{summary.totalExpenditure > 0 
                   ? (summary.totalExpenditure / Math.ceil((new Date(summary.end) - new Date(summary.start)) / (1000 * 60 * 60 * 24))).toFixed(2)
                   : '0.00'}
               </p>
             </Card>
 
-            <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
+            <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 transform hover:scale-105 transition-transform duration-300">
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-blue-500 p-3 rounded-full">
                   <Calendar className="text-white" size={24} />

@@ -32,6 +32,20 @@ const addExpense = asyncHandler(async (req, res) => {
   res.status(201).json(expense);
 });
 
+// @desc    Get single expense
+// @route   GET /api/expenses/:id
+// @access  Private
+const getExpenseById = asyncHandler(async (req, res) => {
+  const expense = await expenseService.getExpenseById(req.params.id);
+
+  if (!expense) {
+    res.status(404);
+    throw new Error('Expense not found');
+  }
+
+  res.status(200).json(expense);
+});
+
 // @desc    Update an expense item (update-item)
 // @route   PUT /api/expenses/:id
 // @access  Private/Admin
@@ -62,6 +76,7 @@ const getSummary = asyncHandler(async (req, res) => {
 
 module.exports = {
   getExpenses,
+  getExpenseById,
   addExpense,
   updateExpense,
   deleteExpense,

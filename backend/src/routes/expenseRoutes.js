@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   getExpenses,
+  getExpenseById,
   addExpense,
   updateExpense,
   deleteExpense,
@@ -19,6 +20,7 @@ router.route('/summary').get(protect, getSummary); // getSummary (with filters)
 
 // PUT/DELETE (individual item, restricted to Admin)
 router.route('/:id')
+.get(protect, getExpenseById) 
   .put(protect, admin, updateExpense) // update-item (by admin)
   .delete(protect, admin, deleteExpense); // delete-item (by admin)
 
