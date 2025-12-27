@@ -96,6 +96,10 @@ const createExpense = async (data) => {
     return await Expense.create(data);
 };
 
+const getExpenseById = async (id) => {
+  return await Expense.findById(id).populate('updatedBy', 'name');
+};
+
 const updateExpense = async (id, data, userId) => {
     const expense = await Expense.findById(id);
 
@@ -126,8 +130,9 @@ const deleteExpense = async (id) => {
 
 module.exports = {
     queryExpenses,
-    calculateSummary,
-    createExpense,
-    updateExpense,
-    deleteExpense,
+  calculateSummary,
+  createExpense,
+  getExpenseById,
+  updateExpense,
+  deleteExpense,
 };

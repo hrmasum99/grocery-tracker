@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { X, Package, DollarSign, Calendar, User, Save, Loader2, CheckCircle } from 'lucide-react';
-import api from '../../services/api';
+import api from '@/services/api';
 
 const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -13,8 +15,27 @@ const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
 
+  // Reset form data when modal opens or expense changes
   useEffect(() => {
     if (isOpen) {
+      if (expense) {
+        setFormData({
+          productName: expense.productName,
+          amount: expense.amount,
+          purchaseDate: new Date(expense.purchaseDate).toISOString().split('T')[0],
+          purchasedBy: expense.purchasedBy,
+        });
+      } else {
+        setFormData({
+          productName: '',
+          amount: '',
+          purchaseDate: '',
+          purchasedBy: '',
+        });
+      }
+      setErrors({});
+      setSuccess(false);
+
       // Hide navbar and buttons when modal opens
       document.body.style.overflow = 'hidden';
       const navbar = document.getElementById('main-navbar');
@@ -38,27 +59,7 @@ const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
       if (navbar) navbar.style.display = 'block';
       if (navButtons) navButtons.style.display = 'flex';
     };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (expense) {
-      setFormData({
-        productName: expense.productName,
-        amount: expense.amount,
-        purchaseDate: new Date(expense.purchaseDate).toISOString().split('T')[0],
-        purchasedBy: expense.purchasedBy,
-      });
-    } else {
-      setFormData({
-        productName: '',
-        amount: '',
-        purchaseDate: '',
-        purchasedBy: '',
-      });
-    }
-    setErrors({});
-    setSuccess(false);
-  }, [expense, isOpen]);
+  }, [isOpen, expense]);
 
   const validate = () => {
     const newErrors = {};
@@ -89,6 +90,7 @@ const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
       }, 1000);
     } catch (err) {
       alert(err.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -109,7 +111,7 @@ const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header - Fixed */}
-        <div className="bg-gradient-to-r from-green-500 to-blue-500 p-4 sm:p-6 text-white relative overflow-hidden flex-shrink-0">
+        <div className="bg-gradient-to-r from-green-500 to-blue-500 p-4 sm:p-6 text-white relative overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 w-32 sm:w-40 h-32 sm:h-40 bg-white/10 rounded-full -mr-16 sm:-mr-20 -mt-16 sm:-mt-20"></div>
           <div className="absolute bottom-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-white/10 rounded-full -ml-12 sm:-ml-16 -mb-12 sm:-mb-16"></div>
           
@@ -167,13 +169,13 @@ const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
           <div className="animate-slideInLeft" style={{ animationDelay: '0.1s' }}>
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
               <div className="flex items-center space-x-1.5 sm:space-x-2">
-                <DollarSign className="text-blue-600" size={16} />
-                <span>Amount</span>
+                <span className="text-blue-600 text-lg font-bold">৳</span>
+                <span>Amount (BDT)</span>
               </div>
             </label>
             <div className="relative">
               <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 text-base sm:text-lg font-semibold">
-                $
+                ৳
               </span>
               <input
                 type="number"
@@ -193,7 +195,6 @@ const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
               </p>
             )}
           </div>
-
           {/* Purchase Date */}
           <div className="animate-slideInLeft" style={{ animationDelay: '0.2s' }}>
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
@@ -249,7 +250,7 @@ const ExpenseModal = ({ isOpen, onClose, expense, onSuccess }) => {
         </div>
 
         {/* Footer - Fixed */}
-        <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex space-x-2 sm:space-x-3 flex-shrink-0 border-t border-gray-200">
+        <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex space-x-2 sm:space-x-3 shrink-0 border-t border-gray-200">
           <button
             onClick={handleSubmit}
             disabled={loading || success}

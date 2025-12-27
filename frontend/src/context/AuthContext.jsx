@@ -1,76 +1,95 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+'use client';
+
+import { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const initAuth = async () => {
       const storedToken = localStorage.getItem('token');
+      
       if (storedToken) {
         try {
-          // Verify token is valid by making a test request
-          const res = await fetch('http://localhost:5000/api/expenses', {
+          setToken(storedToken);
+          
+          // Decode JWT to get user info
+          const decoded = JSON.parse(atob(storedToken.split('.')[1]));
+          
+          // Verify token is still valid by making a simple API call
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses`, {
             headers: { Authorization: `Bearer ${storedToken}` }
           });
           
           if (res.ok) {
-            // Token is valid, fetch user profile
-            const decoded = JSON.parse(atob(storedToken.split('.')[1]));
-            const userRes = await fetch('http://localhost:5000/api/users', {
-              headers: { Authorization: `Bearer ${storedToken}` }
-            });
+            // Token is valid, set user from decoded token
+            const userData = {
+              _id: decoded.id,
+              name: decoded.name || 'User',
+              email: decoded.email || '',
+              role: decoded.role || 'user'
+            };
             
-            if (userRes.ok) {
-              const allUsers = await userRes.json();
-              const currentUser = allUsers.find(u => u._id === decoded.id);
-              if (currentUser) {
-                setUser(currentUser);
-                setToken(storedToken);
-              } else {
-                // User not found, clear token
-                localStorage.removeItem('token');
-                setToken(null);
-                setUser(null);
-              }
-            } else {
-              // Failed to fetch users, clear token
-              localStorage.removeItem('token');
-              setToken(null);
-              setUser(null);
-            }
+            setUser(userData);
+            console.log('✅ User authenticated:', userData.name, '- Role:', userData.role);
           } else {
-            // Token invalid, clear it
+            console.error('❌ Token invalid, status:', res.status);
             localStorage.removeItem('token');
             setToken(null);
             setUser(null);
           }
         } catch (err) {
-          console.error('Auth error:', err);
+          console.error('❌ Auth error:', err);
           localStorage.removeItem('token');
           setToken(null);
           setUser(null);
         }
       }
+      
       setLoading(false);
     };
 
     initAuth();
   }, []);
 
-  const login = (newToken, userData) => {
+  // Separate effect for redirects
+  useEffect(() => {
+    if (!loading) {
+      if (user && pathname === '/') {
+        console.log('✅ User logged in, redirecting to dashboard');
+        router.push('/dashboard');
+      } else if (!user && pathname === '/dashboard') {
+        console.log('❌ No user, redirecting to home');
+        router.push('/');
+      }
+    }
+  }, [user, loading, pathname, router]);
+
+  const login = async (newToken, userData) => {
+    console.log('🔐 Login called with:', userData.name);
     setToken(newToken);
     setUser(userData);
     localStorage.setItem('token', newToken);
+    
+    // Small delay to ensure state is set
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 100);
   };
 
   const logout = () => {
+    console.log('🚪 Logout called');
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
+    router.push('/');
   };
 
   if (loading) {
@@ -89,10 +108,10 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
-};
+}
